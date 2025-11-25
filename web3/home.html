@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio — MD Omar Tahosin</title>
+  <meta name="description" content="Advanced responsive portfolio showcasing UI/UX, Grafix, Logo, IOT and more." />
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="" crossorigin="anonymous" />
+
+  <!-- GSAP for high-level animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+
+  <style>
+    :root{
+      --bg-dark:#19fff3;
+      --glass: rgba(158, 134, 134, 0.06);
+      --accent:#ff8800; /* gold accent */
+      --muted:#0b0141;
+      --max-width:1200px;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    /* Gold-bar textured background using layered gradients */
+    body{
+      margin:0;
+      min-height:100vh;
+      color: #727272;
+      background-color:var(--bg-dark);
+      background-image:
+        linear-gradient(90deg, rgba(255,250,240,0.02) 0%, rgba(255,250,240,0.02) 50%, rgba(0,0,0,0.06) 51%),
+        repeating-linear-gradient(90deg, rgba(255,215,0,0.06) 0 12px, rgba(50,30,0,0.02) 12px 24px),
+        linear-gradient(135deg, rgba(255,215,0,0.05), rgba(255,215,0,0.01));
+      background-blend-mode:overlay,screen,normal;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Subtle animated glow behind content to feel like metallic reflection */
+    .gold-glow{
+      position:fixed;pointer-events:none;inset:0;z-index:0;mix-blend-mode:screen;opacity:0.12;background: radial-gradient(600px 300px at 10% 20%, rgba(255,236,179,0.35), transparent 8%), radial-gradient(500px 250px at 90% 80%, rgba(255,220,120,0.25), transparent 10%);
+      transform:translateZ(0);
+    }
+
+    header{position:sticky;top:0;z-index:40;background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.15));backdrop-filter: blur(6px);border-bottom:1px solid rgba(255,255,255,0.03)}
+    .nav{max-width:var(--max-width);margin:0 auto;display:flex;align-items:center;gap:16px;padding:14px 20px}
+    .brand{font-weight:800;letter-spacing:0.6px;color:var(--accent)}
+    nav{margin-left:auto;display:flex;gap:12px;align-items:center}
+    nav a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:600}
+    nav a:hover{color:#fff;background:rgba(255,255,255,0.03)}
+
+    .container{max-width:"width=device-width";margin:40px auto;padding:20px;position:relative;z-index:10}
+
+    /* Hero / home */
+    .hero{display:grid;grid-template-columns:1fr 420px;gap:32px;align-items:center}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:18px;padding:28px;box-shadow: 0 6px 30px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.03)}
+
+    h1{font-size:2.2rem;margin:0 0 8px}
+    p.lead{color:var(--muted);margin:0 0 20px}
+    .cta{display:inline-flex;gap:10px}
+    .btn{background:linear-gradient(90deg,var(--accent),#ffb84d);color:#000;padding:10px 16px;border-radius:12px;font-weight:700;text-decoration:none}
+
+    /* Skills / services tiles */
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .service{padding:18px;border-radius:12px;background:rgba(255,255,255,0.02);display:flex;gap:14px;align-items:center}
+    .service .icon{width:56px;height:56px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--accent);font-size:1.1rem}
+
+    /* Portfolio thumbnails */
+    .works{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .work{height:160px;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(255,255,255,0.02));display:flex;align-items:flex-end;padding:12px;color:#03023f;font-weight:700}
+
+    /* Achievements & Certificates */
+    .list{display:grid;gap:12px}
+    .item{padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:space-between}
+
+    /* Contact form */
+    form{display:grid;gap:12px}
+    input,textarea,select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:12px;border-radius:10px;color:#fff}
+    textarea{min-height:120px}
+
+    footer{padding:28px;color:var(--muted);text-align:center}
+
+    /* Responsive */
+    @media(max-width:920px){
+      .hero{grid-template-columns:1fr}
+      nav{display:none}
+    }
+
+    /* small animated accents */
+    .sparkle{width:12px;height:12px;border-radius:50%;position:absolute;opacity:0.9;box-shadow:0 0 18px 6px rgba(255,210,120,0.08)}
+
+    /* Page container for single-file multipage SPA */
+    .page{display:none}
+    .page.active{display:block;}
+
+    /* subtle entrance animation (also animated with GSAP on load) */
+    .stagger-item{opacity:0;transform:translateY(18px)}
+
+    /* nav drawer for mobile */
+    .mobile-nav-btn{display:none}
+    @media(max-width:920px){.mobile-nav-btn{display:inline-flex;margin-left:auto}}
+    .drawer{position:fixed;right:16px;top:60px;background:linear-gradient(180deg, rgba(10,10,10,0.9), rgba(10,10,10,0.85));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:8px}
+
+
+    #portfolio .works {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+#portfolio .work {
+  background: var(--card);
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+#portfolio .work:hover {
+  transform: translateY(-40px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+#portfolio .work img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#portfolio .work h3 {
+  padding: 12px 14px;
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+  </style>
+</head>
+<body>
+  <div class="gold-glow" aria-hidden></div>
+  <header>
+    <div class="nav">
+      <div class="brand"><img src="mot.png" alt="avatar" style="width:72px;height:72px;border-radius:2px;"></div><h2>MD Omar Tahosin</h2>
+      <nav id="mainNav">
+        <a href="#home" data-page="home">Home</a>
+        <a href="#about" data-page="about">About</a>
+        <a href="#services" data-page="services">Services</a>
+        <a href="#portfolio" data-page="portfolio">Portfolio</a>
+        <a href="#achievements" data-page="achievements">Achievements</a>
+        <a href="#contact" data-page="contact">Contact</a>
+      </nav>
+      <button class="mobile-nav-btn" id="openMenu" aria-label="Open menu">☰</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HOME -->
+    <section id="home" class="page active">
+      <div class="hero">
+        <div class="card">
+          <div class="stagger-item">
+            <h1>Hi, I’m <span style="color:var(--accent)">MD Omar Tahosin</span></h1>
+            <p class="lead">I am a multidisciplinary designer and maker with expertise across UI design, UX design, graphic design, logo creation,
+               and IoT product design. My passion lies in blending creativity with technology to craft delightful digital experiences and innovative physical prototypes.
+                From designing intuitive interfaces that engage users, to developing smart connected products that bring ideas to life,
+                 I thrive on turning complex concepts into elegant, functional, and visually appealing solutions.
+                  Every project I take on is driven by a commitment to design that not only looks good but also works beautifully.</p>
+            <div class="cta">
+              <a class="btn" href="#contact" data-page="contact">Work with me</a>
+              <a class="btn" href="#portfolio" data-page="portfolio" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fa811f">See portfolio</a>
+            </div>
+          </div>
+
+          <hr style="margin:20px 0;border-color:rgba(255,255,255,0.03)">
+
+          <div class="grid">
+            <div class="service stagger-item">
+              <div class="icon">UI</div>
+              <div>
+                <div style="font-weight:700">UI Design</div>
+                <div style="color:var(--muted);font-size:13px">Pixel-perfect interfaces & design systems</div>
+              </div>
+            </div>
+
+            <div class="service stagger-item">
+              <div class="icon">UX</div>
+              <div>
+                <div style="font-weight:700">UX Design</div>
+                <div style="color:var(--muted);font-size:13px">Research-driven flows & usability-focused solutions</div>
+              </div>
+            </div>
+
+            <div class="service stagger-item">
+              <div class="icon">GD</div>
+              <div>
+                <div style="font-weight:700">Grafix Design</div>
+                <div style="color:var(--muted);font-size:13px">Brand visuals, marketing assets & illustrations</div>
+              </div>
+            </div>
+
+            <div class="service stagger-item">
+              <div class="icon">Logo</div>
+              <div>
+                <div style="font-weight:700">Logo Design</div>
+                <div style="color:var(--muted);font-size:13px">Memorable marks & identity systems</div>
+              </div>
+            </div>
+
+            <div class="service stagger-item">
+              <div class="icon">IOT</div>
+              <div>
+                <div style="font-weight:700">IOT Design</div>
+                <div style="color:var(--muted);font-size:13px">Hardware prototyping, UX for physical products, sensor integrations.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Quick contact / summary card -->
+        <aside class="card">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:12px;align-items:center">
+              <img src="mot.png" alt="avatar" style="width:72px;height:72px;border-radius:12px;background:linear-gradient(90deg,var(--accent),#fa811f)">
+              <div>
+                <div style="font-weight:800">MD Omar Tahosin</div>
+                <div style="color:var(--muted);font-size:13px">Designer • Maker • IOT tinkerer</div>
+              </div>
+            </div>
+
+            <div style="color:var(--muted);font-size:14px">Summary — I am a product designer with X years of experience crafting interfaces and physical prototypes. I focus on human-centered design, rapid prototyping, and building brand-first visuals. I collaborate across teams to ship delightful products.</div>
+
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <a class="btn" href="#services" data-page="services">Services</a>
+              <a class="btn" href="#portfolio" data-page="portfolio" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fa811f">Portfolio</a>
+            </div>
+
+            <div style="margin-top:10px;color:var(--muted);font-size:13px">Quick links</div>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <a href="#achievements" data-page="achievements" style="padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);text-decoration:none;color:var(--muted)">Achievements</a>
+              
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="page">
+      <div class="card stagger-item">
+        <h2>About me</h2>
+        <p style="color:var(--muted)">A short professional biography you can replace with real text. Highlight your skills, background, approach to design, and tools.</p>
+
+        <div style="display:flex;gap:20px;margin-top:18px;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px">
+            <h4 style="margin:0 0 6px">What I do</h4>
+            <p style="color:var(--muted)">I am a multidisciplinary creative professional skilled in UI Design, UX Design, Graphic Design, Logo Design, and IoT Design.
+               My work blends visual aesthetics with functional problem-solving, allowing me to design intuitive digital interfaces, craft meaningful user experiences,
+                and create compelling brand identities. With a strong foundation in visual communication and a passion for modern technology, I bring ideas to life through
+                 thoughtful design systems, prototypes, and branded visuals. My IoT design experience adds a unique dimension to my skill set, enabling me to connect hardware
+                  and software into seamless, user-centered solutions. I constantly explore innovative methods to deliver designs that are both beautiful and impactful.</p>
+          </div>
+
+          <div style="flex:1;min-width:220px">
+            <h4 style="margin:0 0 6px">My process</h4>
+            <p style="color:var(--muted)">Discover → Define → Design → Validate → Deliver. I enjoy fast iteration and user testing.</p>
+          </div>
+
+          <div style="flex:0 0 220px">
+            <h4 style="margin:0 0 6px">Tools</h4>
+            <p style="color:var(--muted)">
+
+                  🖌️ Graphic Design = Adobe Photoshop, Adobe Illustrator, Canva
+
+                  🔤 Logo & Branding = Adobe Illustrator, Adobe Photoshop
+
+                  📡 IoT Design & Development = Arduino IDE, Raspberry Pi
+
+                  💻 Frontend (for UI implementation) = HTML / CSS / JS, Bootstrap, Git / GitHub</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="page">
+      <div class="card">
+        <h2>Services</h2>
+        <p style="color:var(--muted)">Choose from a mix of digital and physical design services.</p>
+
+        <div class="grid" style="margin-top:16px">
+          <div class="service stagger-item">
+            <div class="icon">UI</div>
+            <div>
+              <div style="font-weight:700">UI Design</div>
+              <div style="color:var(--muted);font-size:13px">I am an expert UI designer with a passion for creating clean, modern, and visually engaging digital interfaces.
+                 My focus is on crafting intuitive layouts that balance aesthetics and functionality, ensuring every interaction feels effortless and meaningful.
+                  I pay close attention to detail — from typography and color harmony to responsive design and accessibility — to deliver experiences that look great on every
+                   device. With a deep understanding of user behavior and design principles, I transform complex ideas into beautiful, user-friendly interfaces that leave a 
+                   lasting impression.</div>
+            </div>
+          </div>
+
+          <div class="service stagger-item">
+            <div class="icon">UX</div>
+            <div>
+              <div style="font-weight:700">UX Design</div>
+              <div style="color:var(--muted);font-size:13px">My all design process are grounded in user research,
+                 flow mapping, and usability testing to ensure every product I create truly meets user needs.
+                  Through user research, I gain deep insights into real behaviors, goals, and challenges, helping shape meaningful design decisions.
+                   Flow mapping allows me to visualize how users move through a system or interface, ensuring a smooth and intuitive journey from start to finish.
+                    Finally, usability testing helps me evaluate and refine the design by observing real users interact with it,
+                     identifying pain points and opportunities for improvement. Together, these steps ensure that my designs are not only visually appealing but also effective,
+                      user-centered, and enjoyable to experience.</div>
+            </div>
+          </div>
+
+          <div class="service stagger-item">
+            <div class="icon">GD</div>
+            <div>
+              <div style="font-weight:700">Grafix Design</div>
+              <div style="color:var(--muted);font-size:13px">I am a Grafix Designer who believes that great design has the power to inspire, connect,
+                 and communicate ideas beyond words. My work focuses on transforming concepts into visually stunning and meaningful creations that capture attention and
+                  tell stories. I specialize in crafting logos, posters, brand identities, digital illustrations, and marketing materials that reflect both creativity and
+                   strategy. Every design I create starts with a deep understanding of the message, audience, and purpose — blending color, typography, composition, and visual
+                    balance to achieve harmony and impact. Whether it’s designing for print or digital platforms, I strive to create visuals that not only look beautiful but
+                     also evoke emotion and strengthen brand identity. As a designer, I see every project as an opportunity to bring imagination to life — turning simple ideas
+                      into powerful visual experiences that leave a lasting impression.</div>
+            </div>
+          </div>
+
+          <div class="service stagger-item">
+            <div class="icon">Logo</div>
+            <div>
+              <div style="font-weight:700">Logo & Identity</div>
+              <div style="color:var(--muted);font-size:13px">I am a Logo Designer dedicated to creating strong, memorable, and timeless visual identities that define and
+                 elevate brands. I specialize in crafting brand marks, identity guidelines, and stationery designs that reflect the true essence of a business. For me,
+                  logo design is not just about symbols or shapes — it’s about storytelling. Every logo I create is built on research, creativity, and a deep understanding
+                   of the brand’s personality, audience, and values. I aim to design logos that are simple yet powerful, flexible yet consistent, and instantly recognizable
+                    across all platforms. Alongside the logo, I develop comprehensive brand identity systems — including color palettes, typography, and usage rules — to ensure
+                     a cohesive visual language for every brand touchpoint. From business cards and letterheads to digital assets and marketing materials,
+                      I bring professionalism and artistry together to create a brand presence that feels authentic, modern, and lasting. My goal as a designer is to help
+                       brands stand out with clarity, confidence, and creativity.</div>
+            </div>
+          </div>
+
+          <div class="service stagger-item">
+            <div class="icon">IOT</div>
+            <div>
+              <div style="font-weight:700">IOT Design</div>
+              <div style="color:var(--muted);font-size:13px">I am an IoT Designer who bridges the gap between the digital and physical worlds by creating smart,
+                 connected products that enhance everyday life. My work focuses on designing intuitive and functional IoT experiences — from concept and interface design to
+                  hardware interaction and usability. I combine creativity, technology, and human-centered thinking to design products that not only work seamlessly but also
+                   feel natural and meaningful to use. Whether it’s a smart home device, wearable gadget, or industrial IoT system, I ensure every design is built around the
+                    user’s needs, emphasizing simplicity, reliability, and innovation. I pay close attention to how hardware and software communicate — crafting interfaces, data
+                     flows, and physical interactions that make complex technology feel effortless. My goal as an IoT designer is to create solutions that are intelligent,
+                      efficient, and emotionally engaging, turning ordinary objects into extraordinary experiences through thoughtful design and cutting-edge technology.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+   <section id="portfolio" class="page">
+  <div class="card">
+    <h2>Selected Works</h2>
+    <p style="color:var(--muted)">A curated selection of work with real project thumbnails.</p>
+
+
+    <!-- UI Project -->
+     <h2>UI Project </h2>
+    <div class="works">
+      <div class="work">
+        <img src="ui1.png" alt="">
+      </div>
+      
+      <div class="work">
+        <img src="ui2.png" alt="">
+      </div>
+
+      <div class="work">
+        <img src="ui3.png" alt="">
+      </div>
+
+      <div class="work">
+        <img src="ui4.png" alt="">
+      </div>
+
+      <div class="work">
+        <img src="ui5.png" alt="">
+      </div>
+    </div>
+
+
+
+      
+      <!-- Brand / Logo -->
+       <h2>Brand / Logo </h2>
+      <div class="works">
+      <div class="work">
+        <img src="mot.png" alt="">
+        <h3>MD Omar Tahosin (MOT)</h3>
+      </div>
+      
+      <div class="work">
+        <img src="wt.png" alt="">
+        <h3>Web Theme (WT)</h3>
+      </div>
+
+      <div class="work">
+        <img src="wf.png" alt="">
+        <h3>Web Factory (WF)</h3>
+      </div>
+
+      <div class="work">
+        <img src="wv.png" alt="">
+        <h3>Web View (WV)</h3>
+      </div>
+
+      <div class="work">
+        <img src="mot.png" alt="">
+        <h3>MOT</h3>
+      </div>
+    </div>
+
+
+
+
+
+
+  </div>
+</section>
+
+
+    <!-- ACHIEVEMENTS -->
+    <section id="achievements" class="page">
+      <div class="card">
+        <h2>Achievements</h2>
+        <p style="color:var(--muted)">Highlight awards, recognitions, and milestones here.</p>
+
+        <div class="list" style="margin-top:12px">
+          <div class="item stagger-item"><div>Winner — Design Challenge 2024</div><div style="color:var(--muted)">Details</div></div>
+          <div class="item stagger-item"><div>Featured — Design Magazine</div><div style="color:var(--muted)">Issue #12</div></div>
+          <div class="item stagger-item"><div>Patent filed — Haptic UI</div><div style="color:var(--muted)">2023</div></div>
+        </div>
+      </div>
+    </section>
+
+    
+    <!-- CONTACT -->
+    <section id="contact" class="page">
+      <div class="card">
+        <h2>Contact</h2>
+        <p style="color:var(--muted)">Get in touch — email, message, or schedule an intro call.</p>
+
+        <form id="contactForm">
+          <input type="text" id="name" placeholder="Your name" required />
+          <input type="email" id="email" placeholder="Email address" required />
+          <select id="service">
+            <option value="ui">UI Design</option>
+            <option value="ux">UX Design</option>
+            <option value="grafix">Grafix Design</option>
+            <option value="logo">Logo Design</option>
+            <option value="iot">IOT Design</option>
+          </select>
+          <textarea id="message" placeholder="Tell me about your project" required></textarea>
+          <div style="display:flex;gap:10px">
+            <button type="submit" class="btn">Send message</button>
+            <a class="btn" href="mailto:youremail@example.com?subject=Project%20Inquiry" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff">Email directly</a>
+          </div>
+          <div id="formStatus" style="color:var(--muted);font-size:13px;margin-top:8px"></div>
+        </form>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    © <span id="year"></span> MD Omar Tahosin • Built with care • <span style="color:var(--muted)">Made for web & hardware</span>
+  </footer>
+
+  <!-- Mobile drawer (hidden by default) -->
+  <div id="drawer" class="drawer" style="display:none">
+    <a href="#home" data-page="home">Home</a>
+    <a href="#about" data-page="about">About</a>
+    <a href="#services" data-page="services">Services</a>
+    <a href="#portfolio" data-page="portfolio">Portfolio</a>
+    <a href="#achievements" data-page="achievements">Achievements</a>
+    <a href="#contact" data-page="contact">Contact</a>
+  </div>
+
+ <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // --- Elements ---
+  const pages = document.querySelectorAll('.page');
+  const navLinks = document.querySelectorAll('a[data-page]');
+  const yearEl = document.getElementById('year');
+  const openMenu = document.getElementById('openMenu');
+  const drawer = document.getElementById('drawer');
+  const form = document.getElementById('contactForm');
+  const status = document.getElementById('formStatus');
+
+  // --- SPA Navigation ---
+  function showPage(pageId) {
+    // Hide all pages first
+    pages.forEach(p => p.classList.remove('active'));
+    
+    // Find requested page
+    const targetPage = document.getElementById(pageId);
+
+    // If not found, default to home
+    if (!targetPage) {
+      console.warn('⚠️ Page not found:', pageId, '→ showing home instead.');
+      showPage('home');
+      return;
+    }
+
+    // Show the selected page
+    targetPage.classList.add('active');
+    history.replaceState(null, '', '#' + pageId);
+
+    // Wait until text and elements are ready before animating
+    requestAnimationFrame(() => {
+      const items = targetPage.querySelectorAll('.stagger-item');
+      if (typeof gsap !== 'undefined' && items.length > 0) {
+        gsap.fromTo(
+          items,
+          { y: 18, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: 'power3.out' }
+        );
+      } else {
+        // fallback — ensure text visible even without gsap or items
+        targetPage.style.opacity = 1;
+        targetPage.style.transform = 'none';
+      }
+      createSparkles();
+    });
+  }
+
+  // --- Nav click handling ---
+  navLinks.forEach(a =>
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      showPage(a.dataset.page);
+    })
+  );
+
+  // --- Initial route ---
+  const initial = location.hash.replace('#', '') || 'home';
+  showPage(initial);
+
+  // --- Footer year ---
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // --- Mobile drawer ---
+  if (openMenu && drawer) {
+    openMenu.addEventListener('click', () => {
+      drawer.style.display = drawer.style.display === 'none' ? 'flex' : 'none';
+    });
+    drawer.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => (drawer.style.display = 'none'))
+    );
+  }
+
+  // --- Contact form ---
+  if (form && status) {
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = {
+        name: form.querySelector('#name')?.value || '',
+        email: form.querySelector('#email')?.value || '',
+        service: form.querySelector('#service')?.value || '',
+        message: form.querySelector('#message')?.value || ''
+      };
+
+      status.textContent = 'Sending message...';
+      gsap.to(status, { opacity: 1, duration: 0.2 });
+
+      setTimeout(() => {
+        status.textContent =
+          '✅ Thanks — your message has been received (demo). I will reply to ' +
+          data.email;
+        form.reset();
+        gsap.fromTo(
+          status,
+          { scale: 0.96, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.5 }
+        );
+      }, 900);
+    });
+  }
+
+  // --- Sparkle Animation ---
+  function createSparkles() {
+    document.querySelectorAll('.sparkle').forEach(n => n.remove());
+    for (let i = 0; i < 5; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.style.left = Math.random() * 100 + '%';
+      s.style.top = Math.random() * 80 + '%';
+      s.style.position = 'absolute';
+      s.style.width = '8px';
+      s.style.height = '8px';
+      s.style.borderRadius = '50%';
+      s.style.background =
+        'radial-gradient(circle at 30% 30%, rgba(255,245,210,0.9), rgba(255,200,80,0.6))';
+      s.style.pointerEvents = 'none';
+      document.body.appendChild(s);
+
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(
+          s,
+          { scale: 0, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.5, delay: i * 0.06, yoyo: true, repeat: 1 }
+        );
+        gsap.to(s, {
+          y: -30 - Math.random() * 80,
+          duration: 2,
+          delay: 0.12,
+          opacity: 0
+        });
+      }
+      setTimeout(() => s.remove(), 2200);
+    }
+  }
+
+  // --- Initial entrance animation ---
+  window.addEventListener('load', () => {
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -20, opacity: 0, duration: 0.8, ease: 'power2.out' });
+      gsap.from('.card', { y: 14, opacity: 0, duration: 0.9, stagger: 0.05, delay: 0.12 });
+    }
+    createSparkles();
+  });
+});
+</script>
+
+
+</body>
+</html>
